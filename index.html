@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow — Smart Task Manager</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- BACKGROUND EFFECTS -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+  </div>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <!-- APP SHELL -->
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-name">TaskFlow</span>
+      </div>
+
+      <nav class="sidebar__nav">
+        <p class="nav-label mono">Views</p>
+        <button class="nav-item active" data-filter="all">
+          <span class="nav-item__icon">◈</span> All Tasks
+          <span class="nav-item__count" id="countAll">0</span>
+        </button>
+        <button class="nav-item" data-filter="today">
+          <span class="nav-item__icon">◉</span> Today
+          <span class="nav-item__count" id="countToday">0</span>
+        </button>
+        <button class="nav-item" data-filter="pending">
+          <span class="nav-item__icon">◌</span> Pending
+          <span class="nav-item__count" id="countPending">0</span>
+        </button>
+        <button class="nav-item" data-filter="completed">
+          <span class="nav-item__icon">◍</span> Completed
+          <span class="nav-item__count" id="countCompleted">0</span>
+        </button>
+
+        <p class="nav-label mono" style="margin-top:1.5rem">Categories</p>
+        <button class="nav-item" data-filter="cat-work">
+          <span class="cat-dot" style="--c:#4f9eff"></span> Work
+        </button>
+        <button class="nav-item" data-filter="cat-personal">
+          <span class="cat-dot" style="--c:#a78bfa"></span> Personal
+        </button>
+        <button class="nav-item" data-filter="cat-study">
+          <span class="cat-dot" style="--c:#34d399"></span> Study
+        </button>
+        <button class="nav-item" data-filter="cat-health">
+          <span class="cat-dot" style="--c:#fb923c"></span> Health
+        </button>
+      </nav>
+
+      <div class="sidebar__progress">
+        <p class="mono" style="font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem">DAILY PROGRESS</p>
+        <div class="progress-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+            <circle cx="40" cy="40" r="32" fill="none" stroke="url(#grad)" stroke-width="6"
+              stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201"
+              id="progressCircle" transform="rotate(-90 40 40)"/>
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#4f9eff"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="ring-label">
+            <span id="progressPct">0%</span>
+            <small class="mono">done</small>
+          </div>
+        </div>
+      </div>
+
+      <button class="sidebar__toggle" id="sidebarClose" aria-label="Close sidebar">✕</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+          <div class="topbar__greeting">
+            <h1 id="greetingTitle">All Tasks</h1>
+            <p class="mono" id="dateDisplay"></p>
+          </div>
+        </div>
+        <div class="topbar__right">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search tasks…" aria-label="Search tasks"/>
+          </div>
+          <button class="add-btn" id="openModal" aria-label="Add task">
+            <span>+</span> New Task
+          </button>
+        </div>
+      </header>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-num" id="statTotal">0</span>
+          <span class="stat-label mono">Total</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num neon-blue" id="statPending">0</span>
+          <span class="stat-label mono">Pending</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num neon-green" id="statDone">0</span>
+          <span class="stat-label mono">Done</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num neon-red" id="statHigh">0</span>
+          <span class="stat-label mono">High Priority</span>
+        </div>
+      </div>
+
+      <!-- SORT & FILTER BAR -->
+      <div class="controls-bar">
+        <div class="priority-filters">
+          <button class="pf-btn active" data-priority="all">All</button>
+          <button class="pf-btn" data-priority="high">🔴 High</button>
+          <button class="pf-btn" data-priority="medium">🟡 Medium</button>
+          <button class="pf-btn" data-priority="low">🟢 Low</button>
+        </div>
+        <select class="sort-select" id="sortSelect">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="priority">By Priority</option>
+          <option value="az">A → Z</option>
+        </select>
+      </div>
+
+      <!-- TASK LIST -->
+      <div class="task-list" id="taskList">
+        <!-- Tasks injected by JS -->
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">📭</div>
+        <h3>No tasks here</h3>
+        <p class="mono">Hit "+ New Task" to get started</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL: ADD / EDIT TASK -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Task form">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 id="modalTitle">New Task</h2>
+        <button class="modal__close" id="closeModal" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <div class="field">
+          <label class="mono" for="taskTitle">Task Title *</label>
+          <input type="text" id="taskTitle" placeholder="What needs to be done?" maxlength="100" />
+        </div>
+
+        <div class="field">
+          <label class="mono" for="taskDesc">Description</label>
+          <textarea id="taskDesc" rows="3" placeholder="Add some details (optional)…"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="mono" for="taskCategory">Category</label>
+            <select id="taskCategory">
+              <option value="work">💼 Work</option>
+              <option value="personal">🏠 Personal</option>
+              <option value="study">📚 Study</option>
+              <option value="health">🏃 Health</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="mono" for="taskPriority">Priority</label>
+            <select id="taskPriority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="mono" for="taskDue">Due Date</label>
+          <input type="date" id="taskDue" />
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" id="cancelModal">Cancel</button>
+        <button class="btn btn--primary" id="saveTask">Save Task →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
